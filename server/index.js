@@ -3,12 +3,13 @@ const cors = require('cors');
 const app = express();
 const mongoose = require('mongoose');
 const User = require('./model/user.model')
+require('dotenv').config();
 
 app.use(cors());
 
 app.use(express.json());
 
-const uri = 'mongodb+srv://authjwt:authjwt123@cluster0.qsm1e4w.mongodb.net/?retryWrites=true&w=majority'; 
+const uri = process.env.MONGODB_URI;
 
 mongoose.connect(uri, { useNewUrlParser:true, useUnifiedTopology: true },(err) => {
     if(err) {
