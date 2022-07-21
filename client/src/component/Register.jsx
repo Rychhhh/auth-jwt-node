@@ -61,6 +61,11 @@ export default function Register() {
 
                 </form>
 
+                <div className="text-center mx-[100px] items-center flex flex-wrap">
+                    <p className="mr-2 font-medium">Have account </p>
+                    <button onClick={() => history.push('/login')} className="text-center items-center justify-center my-10 font-bold">Login</button>
+                </div>
+
             </div>
 
         </div>

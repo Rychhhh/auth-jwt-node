@@ -4,7 +4,10 @@ const app = express();
 const mongoose = require('mongoose');
 const User = require('./model/user.model')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
 require('dotenv').config();
+
+
 
 app.use(cors());
 
@@ -22,13 +25,13 @@ mongoose.connect(uri, { useNewUrlParser:true, useUnifiedTopology: true },(err) =
 
 
 app.post('/api/register', async (req, res) => {
-    console.log(req.body);
 
     try {
-        const user = await User.create( {
+        const passBcrypt = await bcrypt.hash(req.body.password, 10);
+        await User.create( {
             name: req.body.name,
             email: req.body.email,
-            password: req.body.password
+            password: passBcrypt
         })
 
         res.json({ status  : "ok" })
@@ -42,13 +45,17 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
 
         const data =  {
-            name: req.body.name,
-            email: req.body.name
+            email: req.body.email
         }
 
-        const user = await User.find(data);
+        const user = await User.findOne(data);
 
-        if(user) {
+        const isPasswordValid = await bcrypt.compare(
+            req.body.password,
+            user.password
+        )
+
+        if(isPasswordValid) {
 
             const  token = jwt.sign({
                 name: user.name,
@@ -63,6 +70,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 
+// Cek data akan ditampilkan status 'ok'
 app.get('/api/quote', async (req, res) => {
 
     // generate token
@@ -73,9 +81,36 @@ app.get('/api/quote', async (req, res) => {
     try {
         const decoded = jwt.verify(token, 'secret123')
         const email = decoded.email
-        const user = await User.find({email: email})
+        const user = await User.find({ email: email })
 
-        res.json({status: 'ok', quote: user.quote})
+
+        res.json({status: 'ok', quote: user.quote })
+    } catch (error) {
+        console.log(error)
+        res.json({ status: 'error' })
+    }
+
+});
+
+
+// Simpan data quote setelah jelas status 'ok'
+app.post('/api/quote', async (req, res) => {
+
+    // generate token
+    const token = req.headers['x-access-token']
+
+
+    // verify token, decode email, findOne user by email
+    try {
+        const decoded = jwt.verify(token, 'secret123')
+        const email = decoded.email
+        const user = await User.updateOne(
+            { email: email },
+            {$set: { quote: req.body.qoute}}
+            )
+
+
+        res.json({status: 'ok', quote: user.quote })
     } catch (error) {
         console.log(error)
         res.json({ status: 'error' })

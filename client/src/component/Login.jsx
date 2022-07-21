@@ -34,9 +34,9 @@ export default function Login() {
     return (
         <div className="flex justify-center h-screen items-center bg-emerald-500">
 
-            <div className="bg-sky-400 rounded-xl">
+            <div className="bg-sky-400 rounded-xl ">
 
-                <form onSubmit={loginForm} className="flex flex-col w-[400px] p-[50px]">
+                <form onSubmit={loginForm} className="flex mx-auto container flex-col w-[400px] p-[50px]">
 
                     <input type="email"
                     value={email}
@@ -54,6 +54,10 @@ export default function Login() {
 
                 </form>
 
+                <div className="text-center mx-[100px] items-center flex flex-wrap">
+                    <p className="mr-2 font-medium">Don't have any account ? </p>
+                    <button onClick={() => history.push('/register')} className="text-center items-center justify-center my-10 font-bold">Register</button>
+                </div>
             </div>
 
         </div>
