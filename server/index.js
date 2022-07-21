@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const mongoose = require('mongoose');
 const User = require('./model/user.model')
+const jwt = require('jsonwebtoken')
 require('dotenv').config();
 
 app.use(cors());
@@ -30,25 +31,55 @@ app.post('/api/register', async (req, res) => {
             password: req.body.password
         })
 
-        res.json({status  : "OK"})
+        res.json({ status  : "ok" })
     } catch( err) {
-        res.json({status  : "ERROR", error: "Duplicate Email"})
+        res.json({status  : "error", error: "Duplicate Email"})
     }
 
     res.json({status: 'OK'})
 });
 
 app.post('/api/login', async (req, res) => {
-        const user = await User.findOne( { 
-            name: req.body.name, 
-            email: req.body.name 
-        });
+
+        const data =  {
+            name: req.body.name,
+            email: req.body.name
+        }
+
+        const user = await User.find(data);
 
         if(user) {
-           return res.json({ status: 'ok', user: true })
+
+            const  token = jwt.sign({
+                name: user.name,
+                email: user.email,
+            }, 'secret123')
+
+           return res.json({ status: 'ok', user: token,  })
         } else {
            return res.json({ status: "error", user: false });
         }
+
+});
+
+
+app.get('/api/quote', async (req, res) => {
+
+    // generate token
+    const token = req.headers['x-access-token']
+
+
+    // verify token, decode email, findOne user by email
+    try {
+        const decoded = jwt.verify(token, 'secret123')
+        const email = decoded.email
+        const user = await User.find({email: email})
+
+        res.json({status: 'ok', quote: user.quote})
+    } catch (error) {
+        console.log(error)
+        res.json({ status: 'error' })
+    }
 
 });
 

@@ -1,12 +1,18 @@
 import { useState } from "react"
+import { useHistory } from 'react-router-dom';
 
 export default function Register() {
 
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [password, setPassword] = useState('');
 
-    async function registerForm(event) { 
+    const history = useHistory();
+
+
+    async function registerForm(event) {
+
+
         event.preventDefault();
 
         const response = await fetch('http://localhost:1337/api/register', {
@@ -18,15 +24,19 @@ export default function Register() {
         })
 
         const body = await response.json();
-        
-        console.log(body);
+
+        console.log(body)
+
+        if(body.status === 'ok') {
+            history.push('/login')
+        }
     }
 
     return (
         <div className="flex justify-center h-screen items-center bg-emerald-500">
 
             <div className="bg-sky-400 rounded-xl">
-              
+
                 <form onSubmit={registerForm} className="flex flex-col w-[400px] p-[50px]">
 
                     <input type="text"
@@ -34,7 +44,7 @@ export default function Register() {
                     onChange={(event) => {setName(event.target.value)}}
                     placeholder='enter name'
                     className="p-3 mb-4 rounded-xl outline-none" />
-                    
+
                     <input type="email"
                     value={email}
                     onChange={(event) => {setEmail(event.target.value)}}
@@ -50,9 +60,9 @@ export default function Register() {
                     <input type="submit" value="Register" className="px-6 py-3 bg-green-500 rounded-xl font-bold text-xl hover:opacity-75" />
 
                 </form>
-                
+
             </div>
-            
+
         </div>
     )
 }
